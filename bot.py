@@ -38,7 +38,7 @@ def put_text_pil(img, txt):
     offset = font_size // 25
     shadowColor = 'black'
 
-    w = int((img.shape[1] - w)/2)
+    w = int((img.shape[1] - wid)/2)
     h = img.shape[0] * 0.85
 
     while h + hei <= img.shape[0] * 0.9:
