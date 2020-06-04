@@ -44,7 +44,7 @@ def put_text_pil(img, txt):
     h = img.shape[0] * 0.85
 
     while h + imgHeight >= img.shape[0] * 0.9:
-        h -= 10
+        h -= img.shape[0] / 100
 
     for off in range(offset):
         # move right
