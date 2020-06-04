@@ -38,10 +38,13 @@ def put_text_pil(img, txt):
     offset = font_size // 25
     shadowColor = 'black'
 
-    imgWidth, imgHeight = im.size
+    _, imgHeight = im.size
 
     w = int((img.shape[1] - w)/2)
     h = img.shape[0] * 0.85
+
+    while h + imgHeight >= img.shape[0] * 0.9:
+        h -= 10
 
     for off in range(offset):
         # move right
