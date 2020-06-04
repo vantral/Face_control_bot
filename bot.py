@@ -138,7 +138,7 @@ def photo(message):
             with open(str(SRC[0]), 'wb') as new_file:
                 new_file.write(downloaded_file)
             img = cv2.imread(str(SRC[0]))
-            img = put_text_pil(img, message.text)
+            img = put_text_pil(img, 'Вот тут дефолт')
             cv2.imwrite(str(SRC[0]) + '.png', img)
             photo = open(str(SRC[0]) + '.png', 'rb')
             os.remove(str(SRC[0]))
