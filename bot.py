@@ -41,7 +41,7 @@ def put_text_pil(img, txt):
     w = int((img.shape[1] - wid)/2)
     h = img.shape[0] * 0.85
 
-    while img.shape[0] - hei < h:
+    while img.shape[0] - font_size < h:
         h -= img.shape[0] / 100
 
     for off in range(offset):
