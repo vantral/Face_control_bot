@@ -25,12 +25,12 @@ def put_text_pil(img, txt):
     font = ImageFont.truetype('3952.ttf', size=font_size)
 
     draw = ImageDraw.Draw(im)
-    w, h = draw.textsize(txt, font=font)
-    while img.shape[1] - w <= img.shape[1] / 50:
+    wid, hei = draw.textsize(txt, font=font)
+    while img.shape[1] - wid <= img.shape[1] / 50:
         font_size -= 10
         font = ImageFont.truetype('3952.ttf', size=font_size)
         draw = ImageDraw.Draw(im)
-        w, h = draw.textsize(txt, font=font)
+        wid, hei = draw.textsize(txt, font=font)
 
     im = Image.fromarray(img)
     d = ImageDraw.Draw(im)
@@ -41,7 +41,7 @@ def put_text_pil(img, txt):
     w = int((img.shape[1] - w)/2)
     h = img.shape[0] * 0.85
 
-    while h + img.shape[0] <= img.shape[0] * 0.9:
+    while h + hei <= img.shape[0] * 0.9:
         h -= img.shape[0] / 100
 
     for off in range(offset):
