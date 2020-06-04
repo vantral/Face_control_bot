@@ -4,11 +4,11 @@ import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont
 import conf     # импортируем наш секретный токен
-import requests
 import flask
 
 WEBHOOK_URL_BASE = "https://{}:{}".format(conf.WEBHOOK_HOST, conf.WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/{}/".format(conf.TOKEN)
+telebot.apihelper.proxy = conf.PROXY
 bot = telebot.TeleBot(conf.TOKEN)  # создаем экземпляр бота
 bot.remove_webhook()
 bot.set_webhook(url=WEBHOOK_URL_BASE+WEBHOOK_URL_PATH)
