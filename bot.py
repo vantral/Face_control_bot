@@ -131,6 +131,19 @@ def main_menu():
     mark_up.add(item)
     return mark_up
 
+def sub_menu():
+    mark_up = telebot.types.InlineKeyboardMarkup()
+    item = telebot.types.InlineKeyboardButton(
+        text=u'Закрыть лицо', callback_data='2'
+    )
+    mark_up.add(item)
+    item = telebot.types.InlineKeyboardButton(
+        text=u'Написать текст', callback_data='3'
+    )
+    mark_up.add(item)
+    return mark_up
+
+
 DATA = ['']
 SRC = ['']
 FILE_INFO = ['']
@@ -147,16 +160,7 @@ def start_message(message):
 def gotit(message):
     id = message.from_user.id
     if message.data == '1':
-        mark_up = telebot.types.InlineKeyboardMarkup()
-        item = telebot.types.InlineKeyboardButton(
-            text=u'Закрыть лицо', callback_data='2'
-        )
-        mark_up.add(item)
-        item = telebot.types.InlineKeyboardButton(
-            text=u'Написать текст', callback_data='3'
-        )
-        mark_up.add(item)
-        bot.send_message(id, text=u'Выбери режим!', reply_markup=mark_up)
+        bot.send_message(id, text=u'Выбери режим!', reply_markup=sub_menu())
     if message.data == '2':
         DATA[0] = '2'
         SRC[0] = ''
@@ -197,7 +201,7 @@ def face_control(message):
                 faces = 1
                 break
         if faces == 0:
-            bot.send_message(message.chat.id, u'Лиц не обнаружено')
+            bot.send_message(message.chat.id, u'Лиц не обнаружено', reply_markup=sub_menu())
         else:
             confidence = 0
 
@@ -222,6 +226,7 @@ def face_control(message):
             SRC[0] = ''
             FILE_INFO[0] = ''
             bot.send_photo(message.chat.id, photo=photo)
+            bot.send_message(message.chat.id, text='Ещё?', reply_markup=sub_menu())
     if DATA[0] == '3':
         FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
         SRC[0] = message.chat.id
@@ -250,6 +255,7 @@ def face_control(message):
                     SRC[0] = ''
                     FILE_INFO[0] = ''
                     bot.send_photo(message.chat.id, photo=photo)
+                    bot.send_message(message.chat.id, text='Ещё?', reply_markup=sub_menu())
 
         @bot.message_handler(regexp='Хочу рандомный текст')
         def no_choice(message):
@@ -272,6 +278,7 @@ def face_control(message):
                 SRC[0] = ''
                 FILE_INFO[0] = ''
                 bot.send_photo(message.chat.id, photo=photo, reply_markup=telebot.types.ReplyKeyboardRemove())
+                bot.send_message(message.chat.id, text='Ещё?', reply_markup=sub_menu())
 
 
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
