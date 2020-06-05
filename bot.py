@@ -154,117 +154,113 @@ def gotit(message):
         )
         mark_up.add(item)
         bot.send_message(id, text=u'Выбери режим!', reply_markup=mark_up)
-    if message.data == '2':
-        message.data = ''
-        SRC = ['']
-        FILE_INFO = ['']
-        bot.send_message(id, text=u'Отправь мне фото!')
 
         @bot.message_handler(content_types=['photo'])
         def face_control(message):
-            FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
-            SRC[0] = message.chat.id
-            if FILE_INFO[0] and SRC[0] == message.chat.id:
-                downloaded_file = bot.download_file(FILE_INFO[0].file_path)
-                with open(str(SRC[0]), 'wb') as new_file:
-                    new_file.write(downloaded_file)
-            prototxt_path = os.path.join('model_data/deploy.prototxt')
-            caffemodel_path = os.path.join('model_data/weights.caffemodel')
-            model = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
-            img = cv2.imread(str(SRC[0]))
-
-            (h, w) = img.shape[:2]
-            blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-
-            model.setInput(blob)
-            detections = model.forward()
-            faces = 0
-            for i in (range(0, detections.shape[2])):
-                if detections[0, 0, i, 2] > 0.5:
-                    faces = 1
-                    break
-            if faces == 0:
-                bot.send_message(message.chat.id, u'Лиц не обнаружено')
-            else:
-                confidence = 0
-
-                while confidence <= 0.5:
-                    i = random.choice(range(0, detections.shape[2]))
-                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                    (startX, startY, endX, endY) = box.astype("int")
-                    confidence = detections[0, 0, i, 2]
-
-                cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-                names = [
-                    'чорт', 'псих', 'баламут', 'обормот', 'труляля',
-                    'траляля', 'дракон', 'бармаглот', 'брандашмыг',
-                    'чешир', 'кот', 'кошка', 'Саня', 'малой'
-                ]
-                name = random.choice(names)
-                img = put_text_face(img, name, startX, endX, endY)
-                cv2.imwrite(str(SRC[0]) + '.png', img)
-                photo = open(str(SRC[0]) + '.png', 'rb')
-                os.remove(str(SRC[0]))
-                os.remove(str(SRC[0]) + '.png')
-                SRC[0] = ''
-                FILE_INFO[0] = ''
-                bot.send_photo(message.chat.id, photo=photo)
-    if message.data == '3':
-        SRC = ['']
-        FILE_INFO = ['']
-        bot.send_message(id, text=u'Отправь мне фото для подписи!')
-
-        @bot.message_handler(content_types=['photo'])
-        def photo(message):
-            FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
-            SRC[0] = message.chat.id
-            mark_up = telebot.types.ReplyKeyboardMarkup()
-            mark_up.row(u'Хочу ввести свой текст')
-            mark_up.row(u'Хочу рандомный текст')
-            bot.send_message(message.chat.id, text=u'Какой текст?', reply_markup=mark_up)
-
-            @bot.message_handler(regexp='Хочу ввести свой текст')
-            def choice(message):
-                bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.',
-                                 reply_markup=telebot.types.ReplyKeyboardRemove())
-
-                @bot.message_handler()
-                def text(message):
-                    if FILE_INFO[0] and SRC[0] == message.chat.id:
-                        downloaded_file = bot.download_file(FILE_INFO[0].file_path)
-                        with open(str(SRC[0]), 'wb') as new_file:
-                            new_file.write(downloaded_file)
-                        img = cv2.imread(str(SRC[0]))
-                        img = put_text_pil(img, message.text)
-                        cv2.imwrite(str(SRC[0]) + '.png', img)
-                        photo = open(str(SRC[0]) + '.png', 'rb')
-                        os.remove(str(SRC[0]))
-                        os.remove(str(SRC[0]) + '.png')
-                        SRC[0] = ''
-                        FILE_INFO[0] = ''
-                        bot.send_photo(message.chat.id, photo=photo)
-
-            @bot.message_handler(regexp='Хочу рандомный текст')
-            def no_choice(message):
+            if message.data == '2':
+                SRC = ['']
+                FILE_INFO = ['']
+                bot.send_message(id, text=u'Отправь мне фото!')
+                FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
+                SRC[0] = message.chat.id
                 if FILE_INFO[0] and SRC[0] == message.chat.id:
                     downloaded_file = bot.download_file(FILE_INFO[0].file_path)
                     with open(str(SRC[0]), 'wb') as new_file:
                         new_file.write(downloaded_file)
-                    img = cv2.imread(str(SRC[0]))
-                    with open('barto.json', encoding='utf-8') as f:
-                        train = json.load(f)
-                    m = markovify.Text(train)
-                    sentence = m.make_short_sentence(max_chars=80)
-                    while sentence in train:
-                        sentence = m.make_short_sentence(max_chars=80)
-                    img = put_text_pil(img, sentence)
+                prototxt_path = os.path.join('model_data/deploy.prototxt')
+                caffemodel_path = os.path.join('model_data/weights.caffemodel')
+                model = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
+                img = cv2.imread(str(SRC[0]))
+
+                (h, w) = img.shape[:2]
+                blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+
+                model.setInput(blob)
+                detections = model.forward()
+                faces = 0
+                for i in (range(0, detections.shape[2])):
+                    if detections[0, 0, i, 2] > 0.5:
+                        faces = 1
+                        break
+                if faces == 0:
+                    bot.send_message(message.chat.id, u'Лиц не обнаружено')
+                else:
+                    confidence = 0
+
+                    while confidence <= 0.5:
+                        i = random.choice(range(0, detections.shape[2]))
+                        box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                        (startX, startY, endX, endY) = box.astype("int")
+                        confidence = detections[0, 0, i, 2]
+
+                    cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
+                    names = [
+                        'чорт', 'псих', 'баламут', 'обормот', 'труляля',
+                        'траляля', 'дракон', 'бармаглот', 'брандашмыг',
+                        'чешир', 'кот', 'кошка', 'Саня', 'малой'
+                    ]
+                    name = random.choice(names)
+                    img = put_text_face(img, name, startX, endX, endY)
                     cv2.imwrite(str(SRC[0]) + '.png', img)
                     photo = open(str(SRC[0]) + '.png', 'rb')
                     os.remove(str(SRC[0]))
                     os.remove(str(SRC[0]) + '.png')
                     SRC[0] = ''
                     FILE_INFO[0] = ''
-                    bot.send_photo(message.chat.id, photo=photo, reply_markup=telebot.types.ReplyKeyboardRemove())
+                    bot.send_photo(message.chat.id, photo=photo)
+            if message.data == '3':
+                SRC = ['']
+                FILE_INFO = ['']
+                bot.send_message(id, text=u'Отправь мне фото для подписи!')
+                FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
+                SRC[0] = message.chat.id
+                mark_up = telebot.types.ReplyKeyboardMarkup()
+                mark_up.row(u'Хочу ввести свой текст')
+                mark_up.row(u'Хочу рандомный текст')
+                bot.send_message(message.chat.id, text=u'Какой текст?', reply_markup=mark_up)
+
+                @bot.message_handler(regexp='Хочу ввести свой текст')
+                def choice(message):
+                    bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.',
+                                     reply_markup=telebot.types.ReplyKeyboardRemove())
+
+                    @bot.message_handler()
+                    def text(message):
+                        if FILE_INFO[0] and SRC[0] == message.chat.id:
+                            downloaded_file = bot.download_file(FILE_INFO[0].file_path)
+                            with open(str(SRC[0]), 'wb') as new_file:
+                                new_file.write(downloaded_file)
+                            img = cv2.imread(str(SRC[0]))
+                            img = put_text_pil(img, message.text)
+                            cv2.imwrite(str(SRC[0]) + '.png', img)
+                            photo = open(str(SRC[0]) + '.png', 'rb')
+                            os.remove(str(SRC[0]))
+                            os.remove(str(SRC[0]) + '.png')
+                            SRC[0] = ''
+                            FILE_INFO[0] = ''
+                            bot.send_photo(message.chat.id, photo=photo)
+
+                @bot.message_handler(regexp='Хочу рандомный текст')
+                def no_choice(message):
+                    if FILE_INFO[0] and SRC[0] == message.chat.id:
+                        downloaded_file = bot.download_file(FILE_INFO[0].file_path)
+                        with open(str(SRC[0]), 'wb') as new_file:
+                            new_file.write(downloaded_file)
+                        img = cv2.imread(str(SRC[0]))
+                        with open('barto.json', encoding='utf-8') as f:
+                            train = json.load(f)
+                        m = markovify.Text(train)
+                        sentence = m.make_short_sentence(max_chars=80)
+                        while sentence in train:
+                            sentence = m.make_short_sentence(max_chars=80)
+                        img = put_text_pil(img, sentence)
+                        cv2.imwrite(str(SRC[0]) + '.png', img)
+                        photo = open(str(SRC[0]) + '.png', 'rb')
+                        os.remove(str(SRC[0]))
+                        os.remove(str(SRC[0]) + '.png')
+                        SRC[0] = ''
+                        FILE_INFO[0] = ''
+                        bot.send_photo(message.chat.id, photo=photo, reply_markup=telebot.types.ReplyKeyboardRemove())
     if message.data == '4':
         sent = horo()
         bot.send_message(id, text=sent, reply_markup=main_menu())
