@@ -155,6 +155,7 @@ def gotit(message):
         mark_up.add(item)
         bot.send_message(id, text=u'Выбери режим!', reply_markup=mark_up)
     if message.data == '2':
+        message.data = ''
         SRC = ['']
         FILE_INFO = ['']
         bot.send_message(id, text=u'Отправь мне фото!')
