@@ -194,7 +194,13 @@ def gotit(message):
                     confidence = detections[0, 0, i, 2]
 
                 cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-                img = put_text_face(img, 'чорт', startX, endX, endY)
+                names = [
+                    'чорт', 'псих', 'баламут', 'обормот', 'труляля',
+                    'траляля', 'дракон', 'бармаглот', 'брандашмыг',
+                    'чешир', 'кот', 'кошка', 'Саня', 'малой'
+                ]
+                name = random.choice(names)
+                img = put_text_face(img, name, startX, endX, endY)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
                 os.remove(str(SRC[0]))
@@ -244,7 +250,13 @@ def gotit(message):
                     with open(str(SRC[0]), 'wb') as new_file:
                         new_file.write(downloaded_file)
                     img = cv2.imread(str(SRC[0]))
-                    img = put_text_pil(img, 'Вот тут дефолт')
+                    with open('barto.json', encoding='utf-8') as f:
+                        train = json.dump(f)
+                    m = markovify.Text(train)
+                    sentence = m.make_short_sentence(max_chars=80)
+                    while sentence in train:
+                        sentence = m.make_short_sentence(max_chars=80)
+                    img = put_text_pil(img, sentence)
                     cv2.imwrite(str(SRC[0]) + '.png', img)
                     photo = open(str(SRC[0]) + '.png', 'rb')
                     os.remove(str(SRC[0]))
