@@ -180,7 +180,7 @@ def gotit(message):
                     confidence = detections[0, 0, i, 2]
 
                 cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-                img = put_text_face(img, 'чорт', endX, endY)
+                img = put_text_face(img, 'чорт', startX, endY)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
                 os.remove(str(SRC[0]))
