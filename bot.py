@@ -219,7 +219,7 @@ def gotit(message):
             SRC[0] = message.chat.id
             mark_up = telebot.types.ReplyKeyboardMarkup()
             mark_up.row(u'Хочу ввести свой текст')
-            mark_up.row(u'Хочу дефолтный текст')
+            mark_up.row(u'Хочу рандомный текст')
             bot.send_message(message.chat.id, text=u'Какой текст?', reply_markup=mark_up)
 
             @bot.message_handler(regexp='Хочу ввести свой текст')
@@ -243,7 +243,7 @@ def gotit(message):
                         FILE_INFO[0] = ''
                         bot.send_photo(message.chat.id, photo=photo)
 
-            @bot.message_handler(regexp='Хочу дефолтный текст')
+            @bot.message_handler(regexp='Хочу рандомный текст')
             def no_choice(message):
                 if FILE_INFO[0] and SRC[0] == message.chat.id:
                     downloaded_file = bot.download_file(FILE_INFO[0].file_path)
