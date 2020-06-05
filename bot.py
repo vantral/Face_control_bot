@@ -204,7 +204,8 @@ def gotit(message):
 
             @bot.message_handler(regexp='Хочу ввести свой текст')
             def choice(message):
-                bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.')
+                bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.',
+                                 reply_markup=telebot.types.ReplyKeyboardRemove())
 
                 @bot.message_handler()
                 def text(message):
