@@ -101,7 +101,7 @@ def gotit(message):
             text=u'Написать текст', callback_data='3'
         )
         mark_up.add(item)
-        bot.send_message(id, text=u'Выбери режим!')
+        bot.send_message(id, text=u'Выбери режим!', reply_markup=mark_up)
     if message.data == '2':
         SRC = ['']
         FILE_INFO = ['']
