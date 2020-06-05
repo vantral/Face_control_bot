@@ -67,8 +67,8 @@ def put_text_pil(img, txt):
     img = np.asarray(im)
     return img
 
-def put_text_face(img, txt, w, h):
-    font_size = img.shape[0] // 20
+def put_text_face(img, txt, sw, fw, h):
+    font_size = img.shape[0] // 15
 
     im = Image.fromarray(img)
 
@@ -78,7 +78,7 @@ def put_text_face(img, txt, w, h):
     wid, hei = draw.textsize(txt, font=font)
     im = Image.fromarray(img)
     d = ImageDraw.Draw(im)
-
+    w = (sw + fw) / 2 - wid / 2
     offset = font_size // 25
     shadowColor = 'black'
 
@@ -180,7 +180,7 @@ def gotit(message):
                     confidence = detections[0, 0, i, 2]
 
                 cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-                img = put_text_face(img, 'чорт', startX, endY)
+                img = put_text_face(img, 'чорт', startX, endX, endY)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
                 os.remove(str(SRC[0]))
