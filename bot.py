@@ -3,7 +3,7 @@ import telebot
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont
-import conf     # импортируем наш секретный токен
+import conf  # импортируем наш секретный токен
 import flask
 
 WEBHOOK_URL_BASE = "https://{}:{}".format(conf.WEBHOOK_HOST, conf.WEBHOOK_PORT)
@@ -11,8 +11,7 @@ WEBHOOK_URL_PATH = "/{}/".format(conf.TOKEN)
 telebot.apihelper.proxy = conf.PROXY
 bot = telebot.TeleBot(conf.TOKEN)  # создаем экземпляр бота
 bot.remove_webhook()
-bot.set_webhook(url=WEBHOOK_URL_BASE+WEBHOOK_URL_PATH)
-
+bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
 
 app = flask.Flask(__name__)
 
@@ -38,7 +37,7 @@ def put_text_pil(img, txt):
     offset = font_size // 25
     shadowColor = 'black'
 
-    w = int((img.shape[1] - wid)/2)
+    w = int((img.shape[1] - wid) / 2)
     h = img.shape[0] * 0.85
 
     while img.shape[0] - hei < h:
@@ -46,21 +45,21 @@ def put_text_pil(img, txt):
 
     for off in range(offset):
         # move right
-        d.text((w-off, h), txt, font=font, fill=shadowColor)
+        d.text((w - off, h), txt, font=font, fill=shadowColor)
         # move left
-        d.text((w+off, h), txt, font=font, fill=shadowColor)
+        d.text((w + off, h), txt, font=font, fill=shadowColor)
         # move up
-        d.text((w, h+off), txt, font=font, fill=shadowColor)
+        d.text((w, h + off), txt, font=font, fill=shadowColor)
         # move down
-        d.text((w, h-off), txt, font=font, fill=shadowColor)
+        d.text((w, h - off), txt, font=font, fill=shadowColor)
         # diagnal left up
-        d.text((w-off, h+off), txt, font=font, fill=shadowColor)
+        d.text((w - off, h + off), txt, font=font, fill=shadowColor)
         # diagnal right up
-        d.text((w+off, h+off), txt, font=font, fill=shadowColor)
+        d.text((w + off, h + off), txt, font=font, fill=shadowColor)
         # diagnal left down
-        d.text((w-off, h-off), txt, font=font, fill=shadowColor)
+        d.text((w - off, h - off), txt, font=font, fill=shadowColor)
         # diagnal right down
-        d.text((w+off, h-off), txt, font=font, fill=shadowColor)
+        d.text((w + off, h - off), txt, font=font, fill=shadowColor)
 
     # теперь можно центрировать текст
     d.text((w, h), txt, fill='rgb(255, 255, 255)', font=font)
@@ -72,11 +71,7 @@ def main_menu(name):
     mark_up = telebot.types.InlineKeyboardMarkup()
     item = telebot.types.InlineKeyboardButton(
         text=u'Хочешь поразвлекаться?', callback_data='1'
-        )
-    mark_up.add(item)
-    url = u"vantral.pythonanywhere.com/results?name=" + name
-    item = telebot.types.InlineKeyboardButton(text=u'Привет?', url=url)
-
+    )
     mark_up.add(item)
     return mark_up
 
@@ -97,56 +92,66 @@ def start_message(message):
 def gotit(message):
     id = message.from_user.id
     if message.data == '1':
+        mark_up = telebot.types.InlineKeyboardMarkup()
+        item = telebot.types.InlineKeyboardButton(
+            text=u'Закрыть лицо', callback_data='2'
+        )
+        mark_up.add(item)
+        item = telebot.types.InlineKeyboardButton(
+            text=u'Написать текст', callback_data='3'
+        )
+        mark_up.add(item)
+        bot.send_message(id, text=u'Выбери режим!')
+    if message.data == '2':
+        SRC = ['']
+        FILE_INFO = ['']
         bot.send_message(id, text=u'Отправь мне фото!')
 
+        @bot.message_handler(content_types=['photo'])
+        def photo(message):
+            FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
+            SRC[0] = message.chat.id
+            mark_up = telebot.types.ReplyKeyboardMarkup()
+            mark_up.row(u'Хочу ввести свой текст')
+            mark_up.row(u'Хочу дефолтный текст')
+            bot.send_message(message.chat.id, text=u'Какой текст?', reply_markup=mark_up)
 
-SRC = ['']
-FILE_INFO = ['']
+            @bot.message_handler(regexp='Хочу ввести свой текст')
+            def choice(message):
+                bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.')
 
+                @bot.message_handler()
+                def text(message):
+                    if FILE_INFO[0] and SRC[0] == message.chat.id:
+                        downloaded_file = bot.download_file(FILE_INFO[0].file_path)
+                        with open(str(SRC[0]), 'wb') as new_file:
+                            new_file.write(downloaded_file)
+                        img = cv2.imread(str(SRC[0]))
+                        img = put_text_pil(img, message.text)
+                        cv2.imwrite(str(SRC[0]) + '.png', img)
+                        photo = open(str(SRC[0]) + '.png', 'rb')
+                        os.remove(str(SRC[0]))
+                        os.remove(str(SRC[0]) + '.png')
+                        SRC[0] = ''
+                        FILE_INFO[0] = ''
+                        bot.send_photo(message.chat.id, photo=photo)
 
-@bot.message_handler(content_types=['photo'])
-def photo(message):
-    FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
-    SRC[0] = message.chat.id
-    mark_up = telebot.types.ReplyKeyboardMarkup()
-    mark_up.row(u'Хочу ввести свой текст')
-    mark_up.row(u'Хочу дефолтный текст')
-    bot.send_message(message.chat.id, text=u'Какой текст?', reply_markup=mark_up)
+            @bot.message_handler(regexp='Хочу дефолтный текст')
+            def no_choice(message):
+                if FILE_INFO[0] and SRC[0] == message.chat.id:
+                    downloaded_file = bot.download_file(FILE_INFO[0].file_path)
+                    with open(str(SRC[0]), 'wb') as new_file:
+                        new_file.write(downloaded_file)
+                    img = cv2.imread(str(SRC[0]))
+                    img = put_text_pil(img, 'Вот тут дефолт')
+                    cv2.imwrite(str(SRC[0]) + '.png', img)
+                    photo = open(str(SRC[0]) + '.png', 'rb')
+                    os.remove(str(SRC[0]))
+                    os.remove(str(SRC[0]) + '.png')
+                    SRC[0] = ''
+                    FILE_INFO[0] = ''
+                    bot.send_photo(message.chat.id, photo=photo)
 
-    @bot.message_handler(regexp='Хочу ввести свой текст')
-    def choice(message):
-        bot.send_message(message.chat.id, text=u'Отправь текст, который хочешь написать.')
-        @bot.message_handler()
-        def text(message):
-            if FILE_INFO[0] and SRC[0] == message.chat.id:
-                downloaded_file = bot.download_file(FILE_INFO[0].file_path)
-                with open(str(SRC[0]), 'wb') as new_file:
-                    new_file.write(downloaded_file)
-                img = cv2.imread(str(SRC[0]))
-                img = put_text_pil(img, message.text)
-                cv2.imwrite(str(SRC[0]) + '.png', img)
-                photo = open(str(SRC[0]) + '.png', 'rb')
-                os.remove(str(SRC[0]))
-                os.remove(str(SRC[0]) + '.png')
-                SRC[0] = ''
-                FILE_INFO[0] = ''
-                bot.send_photo(message.chat.id, photo=photo)
-
-    @bot.message_handler(regexp='Хочу дефолтный текст')
-    def no_choice(message):
-        if FILE_INFO[0] and SRC[0] == message.chat.id:
-            downloaded_file = bot.download_file(FILE_INFO[0].file_path)
-            with open(str(SRC[0]), 'wb') as new_file:
-                new_file.write(downloaded_file)
-            img = cv2.imread(str(SRC[0]))
-            img = put_text_pil(img, 'Вот тут дефолт')
-            cv2.imwrite(str(SRC[0]) + '.png', img)
-            photo = open(str(SRC[0]) + '.png', 'rb')
-            os.remove(str(SRC[0]))
-            os.remove(str(SRC[0]) + '.png')
-            SRC[0] = ''
-            FILE_INFO[0] = ''
-            bot.send_photo(message.chat.id, photo=photo)
 
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
 def webhook():
@@ -161,6 +166,7 @@ def webhook():
 
 if __name__ == '__main__':
     import os
+
     app.debug = False
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
