@@ -164,23 +164,31 @@ def gotit(message):
 
             model.setInput(blob)
             detections = model.forward()
-            confidence = 0
+            faces = 0
+            for i in (range(0, detections.shape[2])):
+                if detections[0, 0, i, 2] > 0.5:
+                    faces = 1
+                    break
+            if faces == 0:
+                bot.send_message(message.chat.id, u'Лиц не обнаружено')
+            else:
+                confidence = 0
 
-            while confidence <= 0.5:
-                i = random.choice(range(0, detections.shape[2]))
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
-                confidence = detections[0, 0, i, 2]
+                while confidence <= 0.5:
+                    i = random.choice(range(0, detections.shape[2]))
+                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                    (startX, startY, endX, endY) = box.astype("int")
+                    confidence = detections[0, 0, i, 2]
 
-            cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-            img = put_text_face(img, 'чорт', startX, startY)
-            cv2.imwrite(str(SRC[0]) + '.png', img)
-            photo = open(str(SRC[0]) + '.png', 'rb')
-            os.remove(str(SRC[0]))
-            os.remove(str(SRC[0]) + '.png')
-            SRC[0] = ''
-            FILE_INFO[0] = ''
-            bot.send_photo(message.chat.id, photo=photo)
+                cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
+                img = put_text_face(img, 'чорт', startX, startY)
+                cv2.imwrite(str(SRC[0]) + '.png', img)
+                photo = open(str(SRC[0]) + '.png', 'rb')
+                os.remove(str(SRC[0]))
+                os.remove(str(SRC[0]) + '.png')
+                SRC[0] = ''
+                FILE_INFO[0] = ''
+                bot.send_photo(message.chat.id, photo=photo)
     if message.data == '3':
         SRC = ['']
         FILE_INFO = ['']
