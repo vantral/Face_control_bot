@@ -211,7 +211,7 @@ def gotit(message):
     if message.data == '3':
         SRC = ['']
         FILE_INFO = ['']
-        bot.send_message(id, text=u'Отправь мне фото!')
+        bot.send_message(id, text=u'Отправь мне фото для подписи!')
 
         @bot.message_handler(content_types=['photo'])
         def photo(message):
