@@ -76,7 +76,6 @@ def put_text_face(img, txt, w, h):
 
     draw = ImageDraw.Draw(im)
     wid, hei = draw.textsize(txt, font=font)
-    h += 2 * hei
     im = Image.fromarray(img)
     d = ImageDraw.Draw(im)
 
@@ -181,7 +180,7 @@ def gotit(message):
                     confidence = detections[0, 0, i, 2]
 
                 cv2.rectangle(img, (startX, startY), (endX, endY), (0, 0, 0), -1)
-                img = put_text_face(img, 'чорт', startX, startY)
+                img = put_text_face(img, 'чорт', endX, endY)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
                 os.remove(str(SRC[0]))
