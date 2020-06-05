@@ -237,7 +237,7 @@ def gotit(message):
                     os.remove(str(SRC[0]) + '.png')
                     SRC[0] = ''
                     FILE_INFO[0] = ''
-                    bot.send_photo(message.chat.id, photo=photo)
+                    bot.send_photo(message.chat.id, photo=photo, reply_markup=telebot.types.ReplyKeyboardRemove())
 
 
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
