@@ -128,6 +128,7 @@ def main_menu():
     item = telebot.types.InlineKeyboardButton(
         text=u'Хочешь предсказание?', callback_data='4'
     )
+    mark_up.add(item)
     return mark_up
 
 
