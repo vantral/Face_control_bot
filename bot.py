@@ -135,12 +135,8 @@ def main_menu():
 def start_message(message):
     id = message.chat.id
     name = message.chat.first_name
-    r_name = ''
-    for letter in name:
-        k = chr(ord(letter) + 6)
-        r_name += k
-    mark_up = main_menu(r_name)
-    bot.send_message(id, u'Привет! Я не буллетпруф', reply_markup=mark_up)
+    mark_up = main_menu()
+    bot.send_message(id, u'Привет, ' + name + '!', reply_markup=mark_up)
 
 
 @bot.callback_query_handler(func=None)
