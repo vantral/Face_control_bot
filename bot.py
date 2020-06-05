@@ -251,7 +251,7 @@ def gotit(message):
                         new_file.write(downloaded_file)
                     img = cv2.imread(str(SRC[0]))
                     with open('barto.json', encoding='utf-8') as f:
-                        train = json.dump(f)
+                        train = json.load(f)
                     m = markovify.Text(train)
                     sentence = m.make_short_sentence(max_chars=80)
                     while sentence in train:
