@@ -5,3 +5,4 @@ pyTelegramBotAPI==3.7.1
 Pillow==7.1.2
 opencv-python-headless
 pysocks==1.7.1
+markovify==0.8.0

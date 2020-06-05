@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 import conf  # импортируем наш секретный токен
 import flask
 import random
+import json
+import markovify
 
 WEBHOOK_URL_BASE = "https://{}:{}".format(conf.WEBHOOK_HOST, conf.WEBHOOK_PORT)
 WEBHOOK_URL_PATH = "/{}/".format(conf.TOKEN)
@@ -105,12 +107,27 @@ def put_text_face(img, txt, sw, fw, h):
     img = np.asarray(im)
     return img
 
-def main_menu(name):
+
+def horo():
+    with open('list_for_models.json', encoding='utf-8') as f:
+        texts = json.load(f)
+    train = ' '.join(texts)
+    m = markovify.Text(train)
+    sentence = m.make_short_sentence(max_chars=100)
+    while sentence in train:
+        sentence = m.make_short_sentence(max_chars=100)
+    return sentence
+
+
+def main_menu():
     mark_up = telebot.types.InlineKeyboardMarkup()
     item = telebot.types.InlineKeyboardButton(
         text=u'Хочешь поразвлекаться?', callback_data='1'
     )
     mark_up.add(item)
+    item = telebot.types.InlineKeyboardButton(
+        text=u'Хочешь предсказание?', callback_data='4'
+    )
     return mark_up
 
 
@@ -238,6 +255,9 @@ def gotit(message):
                     SRC[0] = ''
                     FILE_INFO[0] = ''
                     bot.send_photo(message.chat.id, photo=photo, reply_markup=telebot.types.ReplyKeyboardRemove())
+    if message.data == '4':
+        sent = horo()
+        bot.send_message(id, text=sent, reply_markup=main_menu())
 
 
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
