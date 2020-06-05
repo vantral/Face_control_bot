@@ -131,7 +131,9 @@ def main_menu():
     mark_up.add(item)
     return mark_up
 
-DATA = []
+DATA = ['']
+SRC = ['']
+FILE_INFO = ['']
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -157,8 +159,14 @@ def gotit(message):
         bot.send_message(id, text=u'Выбери режим!', reply_markup=mark_up)
     if message.data == '2':
         DATA[0] = '2'
+        SRC[0] = ''
+        FILE_INFO[0] = ''
+        bot.send_message(id, text=u'Отправь мне фото!')
     if message.data == '3':
         DATA[0] = '3'
+        SRC[0] = ''
+        FILE_INFO[0] = ''
+        bot.send_message(id, text=u'Отправь мне фото для подписи!')
     if message.data == '4':
         sent = horo()
         bot.send_message(id, text=sent, reply_markup=main_menu())
@@ -167,9 +175,6 @@ def gotit(message):
 @bot.message_handler(content_types=['photo'])
 def face_control(message):
     if DATA[0] == '2':
-        SRC = ['']
-        FILE_INFO = ['']
-        bot.send_message(id, text=u'Отправь мне фото!')
         FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
         SRC[0] = message.chat.id
         if FILE_INFO[0] and SRC[0] == message.chat.id:
@@ -218,9 +223,6 @@ def face_control(message):
             FILE_INFO[0] = ''
             bot.send_photo(message.chat.id, photo=photo)
     if DATA[0] == '3':
-        SRC = ['']
-        FILE_INFO = ['']
-        bot.send_message(id, text=u'Отправь мне фото для подписи!')
         FILE_INFO[0] = bot.get_file(message.photo[-1].file_id)
         SRC[0] = message.chat.id
         mark_up = telebot.types.ReplyKeyboardMarkup()
