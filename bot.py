@@ -21,12 +21,26 @@ app = flask.Flask(__name__)
 
 def put_text_pil(img, txt):
     font_size = img.shape[0] // 10
+    if img.shape[0] > img.shape[1]:
+        proportion = img.shape[0] / img.shape[1]
+    else:
+        proportion = img.shape[1] / img.shape[0]
 
     im = Image.fromarray(img)
 
     font = ImageFont.truetype('3952.ttf', size=font_size)
 
     draw = ImageDraw.Draw(im)
+    if len(txt) > proportion * 24:
+        words = txt.split()
+        words = [word + ' ' for word in words]
+        if len(words) % 2:
+            i = len(words) // 2
+        else:
+            i = len(words) // 2 + 1
+        words.insert(i, '\n')
+        txt = ''.join(words)
+
     wid, hei = draw.textsize(txt, font=font)
     while img.shape[1] - wid <= img.shape[1] / 50:
         font_size -= 10
@@ -34,8 +48,6 @@ def put_text_pil(img, txt):
         draw = ImageDraw.Draw(im)
         wid, hei = draw.textsize(txt, font=font)
 
-    im = Image.fromarray(img)
-    d = ImageDraw.Draw(im)
 
     offset = font_size // 25
     shadowColor = 'black'
@@ -270,8 +282,6 @@ def face_control(message):
                 sentence = m.make_short_sentence(max_chars=80)
                 while sentence in train:
                     sentence = m.make_short_sentence(max_chars=80)
-                if len(sentence) > 42:
-                    sentence = sentence[:42] + '\n' + sentence[42:]
                 img = put_text_pil(img, sentence)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
