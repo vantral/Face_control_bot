@@ -20,18 +20,25 @@ app = flask.Flask(__name__)
 
 
 def put_text_pil(img, txt):
-    font_size = img.shape[0] // 10
+    """
+     Функция пишет текст на полученном изображении
+    :param img: открытый с помощью cv2.imread файл
+    :param txt: строка
+    :return: изображение, готовое к записи с помощью cv2.imwrite
+    """
+
+    font_size = img.shape[0] // 10  # примерный размер шрифта
+    # находим значение отношения длины к ширине или ширины
+    # к длине (так, чтобы было больше 1)
     if img.shape[0] > img.shape[1]:
         proportion = img.shape[0] / img.shape[1]
     else:
         proportion = img.shape[1] / img.shape[0]
 
-    im = Image.fromarray(img)
-
     font = ImageFont.truetype('3952.ttf', size=font_size)
 
-
-    if len(txt) > proportion * 24:
+    if len(txt) > proportion * 24:  # примерная длина текста в зависимости от пропорции,
+        # если больше -- разбиваем текст переносом строки
         words = txt.split()
         words = [word + ' ' for word in words]
         if len(words) % 2:
@@ -43,12 +50,11 @@ def put_text_pil(img, txt):
     im = Image.fromarray(img)
     d = ImageDraw.Draw(im)
     wid, hei = d.textsize(txt, font=font)
-    while img.shape[1] - wid <= img.shape[1] / 50:
+    while img.shape[1] - wid <= img.shape[1] / 50:  # подгоняю размер текста, если с ним что-то не так
         font_size -= 10
         font = ImageFont.truetype('3952.ttf', size=font_size)
         d = ImageDraw.Draw(im)
         wid, hei = d.textsize(txt, font=font)
-
 
     offset = font_size // 25
     shadowColor = 'black'
@@ -56,25 +62,27 @@ def put_text_pil(img, txt):
     w = int((img.shape[1] - wid) / 2)
     h = img.shape[0] * 0.85
 
+    # если в тексте несколько строк, то надо подвинуть повыше
     while img.shape[0] - hei < h * 0.96:
         h -= img.shape[0] / 100
 
+    # рисую чёрную рамку вокруг белого текста
     for off in range(offset):
-        # move right
+        # справа
         d.text((w - off, h), txt, font=font, fill=shadowColor)
-        # move left
+        # слева
         d.text((w + off, h), txt, font=font, fill=shadowColor)
-        # move up
+        # сверху
         d.text((w, h + off), txt, font=font, fill=shadowColor)
-        # move down
+        # снизу
         d.text((w, h - off), txt, font=font, fill=shadowColor)
-        # diagnal left up
+        # слева сверху
         d.text((w - off, h + off), txt, font=font, fill=shadowColor)
-        # diagnal right up
+        # справа сверху
         d.text((w + off, h + off), txt, font=font, fill=shadowColor)
-        # diagnal left down
+        # снизу слева
         d.text((w - off, h - off), txt, font=font, fill=shadowColor)
-        # diagnal right down
+        # снизу справа
         d.text((w + off, h - off), txt, font=font, fill=shadowColor)
 
     # теперь можно центрировать текст
@@ -82,7 +90,18 @@ def put_text_pil(img, txt):
     img = np.asarray(im)
     return img
 
+
 def put_text_face(img, txt, sw, fw, h):
+    """
+    Функция практически аналогичная предыдущей, но подписывает квадрат, закрывший лицо
+    :param img: изображение, открытое с помощью cv2.imread
+    :param txt: строка
+    :param sw: координата начала по X
+    :param fw: координата конца по X
+    :param h: координата Y
+    :return: изображение, готовое к записи с помощью cv2.imwrite
+    """
+    # примерный размер шрифта
     font_size = img.shape[0] // 15
 
     im = Image.fromarray(img)
@@ -97,23 +116,24 @@ def put_text_face(img, txt, sw, fw, h):
     offset = font_size // 25
     shadowColor = 'black'
 
+    # снова рамка
     for off in range(offset):
-        # move right
-        d.text((w-off, h), txt, font=font, fill=shadowColor)
-        # move left
-        d.text((w+off, h), txt, font=font, fill=shadowColor)
-        # move up
-        d.text((w, h+off), txt, font=font, fill=shadowColor)
-        # move down
-        d.text((w, h-off), txt, font=font, fill=shadowColor)
-        # diagnal left up
-        d.text((w-off, h+off), txt, font=font, fill=shadowColor)
-        # diagnal right up
-        d.text((w+off, h+off), txt, font=font, fill=shadowColor)
-        # diagnal left down
-        d.text((w-off, h-off), txt, font=font, fill=shadowColor)
-        # diagnal right down
-        d.text((w+off, h-off), txt, font=font, fill=shadowColor)
+        # справа
+        d.text((w - off, h), txt, font=font, fill=shadowColor)
+        # слева
+        d.text((w + off, h), txt, font=font, fill=shadowColor)
+        # сверху
+        d.text((w, h + off), txt, font=font, fill=shadowColor)
+        # снизу
+        d.text((w, h - off), txt, font=font, fill=shadowColor)
+        # слева сверху
+        d.text((w - off, h + off), txt, font=font, fill=shadowColor)
+        # справа сверху
+        d.text((w + off, h + off), txt, font=font, fill=shadowColor)
+        # снизу слева
+        d.text((w - off, h - off), txt, font=font, fill=shadowColor)
+        # снизу справа
+        d.text((w + off, h - off), txt, font=font, fill=shadowColor)
 
     # теперь можно центрировать текст
     d.text((w, h), txt, fill='rgb(255, 255, 255)', font=font)
@@ -122,17 +142,26 @@ def put_text_face(img, txt, sw, fw, h):
 
 
 def horo():
+    """
+    Генерирует предсказание
+    :return: строка
+    """
     with open('list_for_models.json', encoding='utf-8') as f:
         texts = json.load(f)
     train = ' '.join(texts)
     m = markovify.Text(train)
     sentence = m.make_short_sentence(max_chars=100)
+    # проверяю, чтобы предложения не было в исходном тексте, а то так не интересно
     while sentence in train:
         sentence = m.make_short_sentence(max_chars=100)
     return sentence
 
 
 def main_menu():
+    """
+    Первое меню: выбор между предсказанием и всем остальным
+    :return: reply_markup
+    """
     mark_up = telebot.types.InlineKeyboardMarkup()
     item = telebot.types.InlineKeyboardButton(
         text=u'Хочешь поразвлекаться?', callback_data='1'
@@ -144,7 +173,12 @@ def main_menu():
     mark_up.add(item)
     return mark_up
 
+
 def sub_menu():
+    """
+    Второе меню: выбор между режимами Закрыть лицо и Написать текст
+    :return: reply_markup
+    """
     mark_up = telebot.types.InlineKeyboardMarkup()
     item = telebot.types.InlineKeyboardButton(
         text=u'Закрыть лицо', callback_data='2'
@@ -156,14 +190,17 @@ def sub_menu():
     mark_up.add(item)
     return mark_up
 
+# Глобальные переменные, необходимы для дальнейшей работы
 
 DATA = ['']
 SRC = ['']
 FILE_INFO = ['']
 
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
     id = message.chat.id
+    # хочу здороваться по first name
     name = message.chat.first_name
     mark_up = main_menu()
     bot.send_message(id, u'Привет, ' + name + '!', reply_markup=mark_up)
@@ -175,8 +212,9 @@ def gotit(message):
     if message.data == '1':
         bot.send_message(id, text=u'Выбери режим!', reply_markup=sub_menu())
     if message.data == '2':
+        # глобальные переменные используются в других декораторах
         DATA[0] = '2'
-        SRC[0] = ''
+        SRC[0] = ''  # очищаю каждый раз, чтобы случайно не отправлялись дубли
         FILE_INFO[0] = ''
         bot.send_message(id, text=u'Отправь мне фото!')
     if message.data == '3':
@@ -198,11 +236,13 @@ def face_control(message):
             downloaded_file = bot.download_file(FILE_INFO[0].file_path)
             with open(str(SRC[0]), 'wb') as new_file:
                 new_file.write(downloaded_file)
+        # ищу лицо
         prototxt_path = os.path.join('model_data/deploy.prototxt')
         caffemodel_path = os.path.join('model_data/weights.caffemodel')
         model = cv2.dnn.readNetFromCaffe(prototxt_path, caffemodel_path)
         img = cv2.imread(str(SRC[0]))
 
+        # закрываю лицо
         (h, w) = img.shape[:2]
         blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
 
@@ -234,6 +274,7 @@ def face_control(message):
             img = put_text_face(img, name, startX, endX, endY)
             cv2.imwrite(str(SRC[0]) + '.png', img)
             photo = open(str(SRC[0]) + '.png', 'rb')
+            # удаляю файлы, чтобы не захламлять сервер
             os.remove(str(SRC[0]))
             os.remove(str(SRC[0]) + '.png')
             SRC[0] = ''
