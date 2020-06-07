@@ -270,6 +270,8 @@ def face_control(message):
                 sentence = m.make_short_sentence(max_chars=80)
                 while sentence in train:
                     sentence = m.make_short_sentence(max_chars=80)
+                if len(sentence) > 42:
+                    sentence = sentence[:42] + '\n' + sentence[42:]
                 img = put_text_pil(img, sentence)
                 cv2.imwrite(str(SRC[0]) + '.png', img)
                 photo = open(str(SRC[0]) + '.png', 'rb')
