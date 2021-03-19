@@ -2,7 +2,7 @@ numpy==1.18.4
 opencv-python==4.2.0.34
 Flask==1.1.2
 pyTelegramBotAPI==3.7.1
-Pillow==7.1.2
+Pillow==8.1.1
 opencv-python-headless
 pysocks==1.7.1
 markovify==0.8.0
